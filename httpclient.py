@@ -40,14 +40,22 @@ class HTTPClient(object):
         self.socket.connect((host, port))
         return None
 
+    # Gets the code from the response headers
     def get_code(self, data):
-        return None
+        code = int(data[9:12])
+        return code
 
+    # Gets the headers from the response header 
     def get_headers(self,data):
-        return None
+        array_response = data.split("\r\n\r\n")
+        headers = array_response[0]
+        return headers
 
+    # Gets the body from the response header
     def get_body(self, data):
-        return None
+        array_response = data.split('\r\n\r\n')
+        body = array_response[1]
+        return body
     
     def sendall(self, data):
         self.socket.sendall(data.encode('utf-8'))
