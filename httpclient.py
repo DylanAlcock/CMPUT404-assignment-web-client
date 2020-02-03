@@ -2,6 +2,8 @@
 # coding: utf-8
 # Copyright 2016 Abram Hindle, https://github.com/tywtyw2002, and https://github.com/treedust
 # 
+# Copyright 2018 Dylan Alcock 
+
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -78,11 +80,109 @@ class HTTPClient(object):
     def GET(self, url, args=None):
         code = 500
         body = ""
+        
+        #Get parts of the url
+        parseResult = urllib.parse.urlparse(url)
+        print("PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP", parseResult)
+        host = parseResult.hostname
+        port = parseResult.port
+        print("PORT", port)
+        scheme = parseResult.scheme
+        path = parseResult.path
+        query = parseResult.query
+        #fragment = parseResult.fragment
+        
+        if not (port):
+            port = 80
+            
+        if (port):
+            self.connect(host,port)
+        else:
+            self.connect(host)
+        
+        if not (path):
+            path = "/"
+        
+        if (query):
+            args_to_get = "?" + query
+            if (args):
+                args_to_get += "&" + urllib.parse.urlencode(args)             
+            
+        else:
+            args_to_get = ""
+            if (args):
+                args_to_get += "?" + urllib.parse.urlencode(args) 
+        
+        print("GET "+ path + args_to_get + " HTTP/1.1\nHost: "+host+":"+str(port)+"\r\nAccept: */*\r\nConnection: close\r\n\r\n")
+        try:
+            # Reference: https://stackoverflow.com/questions/6686261/what-at-the-bare-minimum-is-required-for-an-http-request
+            self.sendall("GET "+ path + args_to_get + " HTTP/1.1\nHost: "+host+":"+"\r\nAccept: */*\r\nConnection: close\r\n\r\n")
+            
+        except socket.error:
+            print("Send Failed")
+            sys.exit()
+        
+        response = self.recvall(self.socket)
+        
+        header = self.get_headers(response)
+        code = self.get_code(response)
+        body = self.get_body(response)
+            
+        print(body)     
+        
+        self.close()        
         return HTTPResponse(code, body)
 
     def POST(self, url, args=None):
         code = 500
         body = ""
+        
+        parseResult = urllib.parse.urlparse(url)
+        host = parseResult.hostname
+        port = parseResult.port
+        scheme = parseResult.scheme
+        path = parseResult.path
+        query = parseResult.query
+        #fragment = parseResult.fragment
+        
+        if (port):
+            self.connect(host,port)
+        else:
+            self.connect(host)
+        
+        if not (path):
+            path = "/"
+        
+        if (query):
+            query = "?" + query     
+    
+        args_to_post = ""
+        if (args):
+            args_to_post = urllib.parse.urlencode(args)               
+        
+        try:
+            #Reference: https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST
+            self.sendall("POST " + path + query + " HTTP/1.1\r\n" +
+            "Host: "+host+"\r\n" +
+            "Content-Type: application/x-www-form-urlencoded\r\nAccept: */*\r\n" +
+            "Content-Length: "+str(len(args_to_post))+"\r\n" +
+            "Connection: close\r\n\r\n" + 
+            args_to_post)
+        
+        except socket.error:
+            print("Send Failed")
+            sys.exit()
+            
+        response = self.recvall(self.socket)
+        
+        header = self.get_headers(response)
+        code = self.get_code(response)
+        body = self.get_body(response)       
+        
+        print(body)   
+        
+        self.close()        
+        
         return HTTPResponse(code, body)
 
     def command(self, url, command="GET", args=None):
