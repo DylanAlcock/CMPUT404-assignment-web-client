@@ -83,22 +83,16 @@ class HTTPClient(object):
         
         #Get parts of the url
         parseResult = urllib.parse.urlparse(url)
-        print("PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP", parseResult)
         host = parseResult.hostname
         port = parseResult.port
-        print("PORT", port)
         scheme = parseResult.scheme
         path = parseResult.path
         query = parseResult.query
-        #fragment = parseResult.fragment
-        
-        if not (port):
-            port = 80
             
         if (port):
             self.connect(host,port)
         else:
-            self.connect(host)
+            self.connect(host, 80)
         
         if not (path):
             path = "/"
@@ -107,16 +101,15 @@ class HTTPClient(object):
             args_to_get = "?" + query
             if (args):
                 args_to_get += "&" + urllib.parse.urlencode(args)             
-            
         else:
             args_to_get = ""
             if (args):
                 args_to_get += "?" + urllib.parse.urlencode(args) 
         
-        print("GET "+ path + args_to_get + " HTTP/1.1\nHost: "+host+":"+str(port)+"\r\nAccept: */*\r\nConnection: close\r\n\r\n")
         try:
             # Reference: https://stackoverflow.com/questions/6686261/what-at-the-bare-minimum-is-required-for-an-http-request
-            self.sendall("GET "+ path + args_to_get + " HTTP/1.1\nHost: "+host+":"+"\r\nAccept: */*\r\nConnection: close\r\n\r\n")
+            self.sendall("GET "+ path + args_to_get + " HTTP/1.1\r\nHost: " + 
+                      host +"\r\nConnection: close\r\nAccept: */*\r\n\r\n")
             
         except socket.error:
             print("Send Failed")
@@ -128,7 +121,7 @@ class HTTPClient(object):
         code = self.get_code(response)
         body = self.get_body(response)
             
-        print(body)     
+        #print(body)     
         
         self.close()        
         return HTTPResponse(code, body)
@@ -179,7 +172,7 @@ class HTTPClient(object):
         code = self.get_code(response)
         body = self.get_body(response)       
         
-        print(body)   
+        #print(body)   
         
         self.close()        
         

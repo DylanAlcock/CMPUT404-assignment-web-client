@@ -18,3 +18,9 @@ examples thus some of the code is Copyright © 2001-2013 Python
 Software Foundation; All Rights Reserved under the PSF license (GPL
 compatible) http://docs.python.org/2/library/socketserver.html
 
+Additions added by Dylan Alcock
+
+References:
+For finding out whats needed for post https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST
+
+For finding whats needed for get https://stackoverflow.com/questions/6686261/what-at-the-bare-minimum-is-required-for-an-http-request
