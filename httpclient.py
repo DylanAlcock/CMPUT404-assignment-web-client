@@ -2,7 +2,7 @@
 # coding: utf-8
 # Copyright 2016 Abram Hindle, https://github.com/tywtyw2002, and https://github.com/treedust
 # 
-# Copyright 2018 Dylan Alcock 
+# Copyright 2020 Dylan Alcock 
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,10 +29,12 @@ import urllib.parse
 def help():
     print("httpclient.py [GET/POST] [URL]\n")
 
+
 class HTTPResponse(object):
     def __init__(self, code=200, body=""):
         self.code = code
         self.body = body
+
 
 class HTTPClient(object):
     #def get_host_port(self,url):
@@ -44,7 +46,7 @@ class HTTPClient(object):
 
     # Gets the code from the response headers
     def get_code(self, data):
-        code = int(data[9:12])
+        code = int(data.split(" ")[1])
         return code
 
     # Gets the headers from the response header 
@@ -88,7 +90,8 @@ class HTTPClient(object):
         scheme = parseResult.scheme
         path = parseResult.path
         query = parseResult.query
-            
+        
+        #if port specified use that otherwise connect to port 80
         if (port):
             self.connect(host,port)
         else:
@@ -97,6 +100,7 @@ class HTTPClient(object):
         if not (path):
             path = "/"
         
+        # add query arguments if needed
         if (query):
             args_to_get = "?" + query
             if (args):
@@ -130,6 +134,7 @@ class HTTPClient(object):
         code = 500
         body = ""
         
+        #Get parts of the url
         parseResult = urllib.parse.urlparse(url)
         host = parseResult.hostname
         port = parseResult.port
@@ -138,17 +143,19 @@ class HTTPClient(object):
         query = parseResult.query
         #fragment = parseResult.fragment
         
+        #if port specified use that otherwise connect to port 80
         if (port):
             self.connect(host,port)
         else:
-            self.connect(host)
+            self.connect(host, 80)
         
         if not (path):
             path = "/"
         
         if (query):
             query = "?" + query     
-    
+        
+        # add query arguments if needed
         args_to_post = ""
         if (args):
             args_to_post = urllib.parse.urlencode(args)               
